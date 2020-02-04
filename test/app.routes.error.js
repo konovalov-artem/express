@@ -55,5 +55,22 @@ describe('app', function(){
       .get('/')
       .expect(204, done);
     })
+
+    it('should handle error in async route', function(done){
+      var app = express();
+  
+      app.get('/', async function(req, res, next){
+        await new Promise((resolve, reject) => reject(new Error('fabricated error')));
+        next();
+      });
+      app.use(function(err, req, res, next){
+        err.message.should.equal('fabricated error');
+        res.send(200);
+      });
+
+      request(app)
+      .get('/')
+      .expect(200, done);
+    });
   })
 })
